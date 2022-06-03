@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "satellite_tracker"
+version = "0.1.0"
+description = ""
+authors = ["Matt Seminara <matthewseminara@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^1.4.2"
+requests = "^2.27.1"
+ipykernel = "^6.13.0"
+pyarrow = "^8.0.0"
+boto3 = "^1.24.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
