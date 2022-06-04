@@ -89,7 +89,7 @@ def dataframe_to_s3(input_datafame:pd.DataFrame, satellite_data_type:str = "posi
         'LocationConstraint': 'us-west-1'})
     # If the bucket already exists, continue process
     except (botocore.exceptions.ClientError):
-        print(f"This Bucket Already Exists! Uploading data to folder within existing bucket '{app_name}-{satellite_data_type}`.")    
+        print(f"This Bucket Already Exists! Uploading data to folder within existing bucket 'satellite_tracker-{satellite_data_type}-raw`.")    
         
     # Buffer data frame
     out_buffer = BytesIO() 
