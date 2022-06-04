@@ -63,27 +63,29 @@ def request_to_dataframe(input_data:dict) -> pd.DataFrame:
 
     return pd.DataFrame.from_dict(data=[input_data])
 
-def dataframe_to_s3(input_datafame:pd.DataFrame, app_name:str, satellite_data_type:str):
+def dataframe_to_s3(input_datafame:pd.DataFrame, satellite_data_type:str = "position"):
     '''_summary_
-    Create an s3 bucket if one does not exist. 
+    Convert pandas dataframe object to Apache Parquet file format and upload data
+    to AWS s3 bucket.
 
     Parameters
     ----------
     input_datafame : pd.DataFrame
         _description_
-    app_name : str
-        _description_
-    satellite_data_type : str
-        _description_
+    satellite_data_type : str, optional
+        _description_, by default "position"
+        Two options:
+        - position (default)
+        - tle
     '''
     
     s3 = boto3.client('s3')
     todays_date = datetime.datetime.today().strftime(r"%Y-%m-%d")
-    bucket_name = f"{app_name}-{satellite_data_type}"
+    bucket_name = f"satellite_tracker-{satellite_data_type}-raw"
 
     # Try and create a bucket in S3
     try:        
-        s3.create_bucket(Bucket=f"{app_name}-{satellite_data_type}", CreateBucketConfiguration={
+        s3.create_bucket(Bucket=f"satellite_tracker-{satellite_data_type}-raw", CreateBucketConfiguration={
         'LocationConstraint': 'us-west-1'})
     # If the bucket already exists, continue process
     except (botocore.exceptions.ClientError):
@@ -96,11 +98,20 @@ def dataframe_to_s3(input_datafame:pd.DataFrame, app_name:str, satellite_data_ty
     # Get the s3 objects timestamp based on the requested datatype
     s3.put_object(Bucket=bucket_name, Key=f"{todays_date}/{datetime.datetime.now()}-{satellite_data_type}.parquet", Body=out_buffer.getvalue())
 
-test = get_iss_location(is_tle=False)
+def raw_iss_position_ingestion():
+    '''_summary_
+    This function builds a datapipeline to get data from the API
+    and insert it into an AWS s3 bucket.
+    '''
 
-df = pd.DataFrame.from_dict(data=[test])
+    # Get ISS position data from the API
+    iss_position_data = get_iss_location(is_tle=False)
 
-dataframe_to_s3(
-    input_datafame=df,
-    app_name="satellitetracker",
-    satellite_data_type="position")  
+    # Put data into Pandas Dataframe object
+    iss_position_dataframe = request_to_dataframe(iss_position_data)
+
+    # Transform dataframe to parquet format and insert into s3 bucket
+    dataframe_to_s3(
+        iss_position_dataframe,
+        "position"
+    )
