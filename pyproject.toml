@@ -9,7 +9,6 @@ python = "^3.10"
 pandas = "^1.4.2"
 requests = "^2.27.1"
 ipykernel = "^6.13.0"
-pyarrow = "^8.0.0"
 boto3 = "^1.24.1"
 
 [tool.poetry.dev-dependencies]
