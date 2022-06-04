@@ -3,7 +3,6 @@ import botocore.exceptions
 from io import BytesIO
 import datetime
 import logging
-from more_itertools import bucket
 import pandas as pd
 import requests
 import re
