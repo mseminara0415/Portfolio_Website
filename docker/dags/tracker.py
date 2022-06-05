@@ -1,7 +1,8 @@
 import boto3
 import botocore.exceptions
-from io import BytesIO
 from datetime import datetime
+from io import BytesIO
+import json
 import logging
 import pandas as pd
 import requests
@@ -11,7 +12,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 
 
-def get_iss_location(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
+def load_raw_iss_to_s3(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
 
     Parameters
@@ -27,23 +28,43 @@ def get_iss_location(norad_id: int = 25544, units: str = "miles", is_tle:bool = 
         _description_,
         by default False. TLE data is used for plotting the orbit.
         When this parameter is False we instead return positioning data (lat, long, altitude, etc..)
-
-    Returns
-    -------
-    dict
-        _description_
     '''
+
+    # Set s3 client
+    s3 = boto3.client('s3')
+
+    # Get todays data, which will be used for partitioning folders within bucket
+    todays_date = datetime.today().strftime(r"%Y-%m-%d")
+
+    # Set destination bucket for raw satallite tracking data
+    bucket_name = "satellite-tracker-raw"
+    
+
     # If we want to return positioning data
     if not is_tle:
+        # Get position data from API
         api_url = f"https://api.wheretheiss.at/v1/satellites/{norad_id}?units={units}&?timestamp"
         iss_data = requests.get(api_url).json()
 
+        # Get the s3 objects timestamp based on the requested datatype
+        s3.put_object(
+            Bucket=bucket_name,
+            Key=f"position-data/{todays_date}/{datetime.now()}-position.json",
+            Body=json.dumps(iss_data)
+        )
+
     # If we want to return orbital data
     elif is_tle:
+        # Get tle data from API
         api_url_tle = f"https://api.wheretheiss.at/v1/satellites/{norad_id}/tles"
         iss_data = requests.get(api_url_tle).json()
-        
-    return iss_data
+
+        # Get the s3 objects timestamp based on the requested datatype
+        s3.put_object(
+            Bucket=bucket_name,
+            Key=f"tle-data/{todays_date}/{datetime.now()}-tle.json",
+            Body=json.dumps(iss_data)
+        )
 
 def request_to_dataframe(ti:dict) -> pd.DataFrame:
     '''_summary_
@@ -106,30 +127,52 @@ def dataframe_to_s3(ti, satellite_data_type:str = "position"):
     # Get the s3 objects timestamp based on the requested datatype
     s3.put_object(Bucket=bucket_name, Key=f"{todays_date}/{datetime.datetime.now()}-{satellite_data_type}.parquet", Body=input_parquet_file.getvalue())
 
-dag = DAG(
-dag_id="my_dag",
-start_date=datetime(2022, 1, 1),
-catchup=False,
-schedule_interval='*/10 * * * * *'    
-)
+# dag = DAG(
+# dag_id="my_dag",
+# start_date=datetime(2022, 1, 1),
+# catchup=False,
+# schedule_interval='*/10 * * * * *'    
+# )
 
-get_data_from_api = PythonOperator(
-    task_id="get_data_from_api",
-    python_callable=get_iss_location,
-    dag=dag
-)
+# get_data_from_api = PythonOperator(
+#     task_id="get_data_from_api",
+#     python_callable=get_iss_location,
+#     dag=dag
+# )
 
-api_data_to_dataframe = PythonOperator(
-    task_id="put_data_into_dataframe",
-    python_callable=request_to_dataframe,
-    dag=dag
-)
+# api_data_to_dataframe = PythonOperator(
+#     task_id="put_data_into_dataframe",
+#     python_callable=request_to_dataframe,
+#     dag=dag
+# )
 
-raw_data_to_s3 = PythonOperator(
-    task_id="ingest_raw_data_to_s3",
-    python_callable=dataframe_to_s3,
-    op_kwargs={'satellite_data_type':'position'},
-    dag=dag
-)
+# raw_data_to_s3 = PythonOperator(
+#     task_id="ingest_raw_data_to_s3",
+#     python_callable=dataframe_to_s3,
+#     op_kwargs={'satellite_data_type':'position'},
+#     dag=dag
+# )
 
-get_data_from_api >> api_data_to_dataframe >> raw_data_to_s3
+# get_data_from_api >> api_data_to_dataframe >> raw_data_to_s3
+
+load_raw_iss_to_s3(is_tle=False)
+
+
+
+# Steps of datapipeline:
+'''
+Steps of datapipline:
+
+1. Pull data from API using requests. Save as json file in s3 bucket.
+
+
+2.
+
+
+3.
+
+
+4.
+
+
+'''
