@@ -1,13 +1,19 @@
 import boto3
 import botocore.exceptions
 from io import BytesIO
-import datetime
+from datetime import datetime
 import logging
 import pandas as pd
 import requests
 import re
 
+from airflow import DAG
+from airflow.operators.python import PythonOperator, BranchPythonOperator
 
+dag = DAG(
+    dag_id="test"
+
+)
 
 def get_iss_location(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
@@ -79,7 +85,7 @@ def dataframe_to_s3(input_datafame:pd.DataFrame, satellite_data_type:str = "posi
     '''
     
     s3 = boto3.client('s3')
-    todays_date = datetime.datetime.today().strftime(r"%Y-%m-%d")
+    todays_date = datetime.today().strftime(r"%Y-%m-%d")
     bucket_name = f"satellite_tracker-{satellite_data_type}-raw"
 
     # Try and create a bucket in S3
