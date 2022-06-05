@@ -19,7 +19,7 @@ services:
         ports:
             - "15432:80"
     webserver:
-        image: puckel/docker-airflow
+        image: apache/airflow
         restart: always
         depends_on:
             - postgres

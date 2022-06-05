@@ -63,6 +63,14 @@ def request_to_dataframe(ti:dict) -> pd.DataFrame:
     '''
     input_data = ti.xcom_pull(task_ids=['get_data_from_api'])
 
+    df = pd.DataFrame.from_dict(data=[input_data])
+
+    # Buffer data frame
+    out_buffer = BytesIO() 
+    df.to_parquet(out_buffer, index=False)
+
+
+
     return pd.DataFrame.from_dict(data=[input_data])
 
 def dataframe_to_s3(ti, satellite_data_type:str = "position"):
@@ -81,7 +89,7 @@ def dataframe_to_s3(ti, satellite_data_type:str = "position"):
         - tle
     '''
 
-    input_dataframe = ti.xcom_pull(task_ids=['put_data_into_dataframe'])
+    input_parquet_file = ti.xcom_pull(task_ids=['put_data_into_dataframe'])
     
     s3 = boto3.client('s3')
     todays_date = datetime.today().strftime(r"%Y-%m-%d")
@@ -94,13 +102,9 @@ def dataframe_to_s3(ti, satellite_data_type:str = "position"):
     # If the bucket already exists, continue process
     except (botocore.exceptions.ClientError):
         print(f"This Bucket Already Exists! Uploading data to folder within existing bucket 'satellite_tracker-{satellite_data_type}-raw`.")    
-        
-    # Buffer data frame
-    out_buffer = BytesIO() 
-    input_dataframe.to_parquet(out_buffer, index=False)
 
     # Get the s3 objects timestamp based on the requested datatype
-    s3.put_object(Bucket=bucket_name, Key=f"{todays_date}/{datetime.datetime.now()}-{satellite_data_type}.parquet", Body=out_buffer.getvalue())
+    s3.put_object(Bucket=bucket_name, Key=f"{todays_date}/{datetime.datetime.now()}-{satellite_data_type}.parquet", Body=input_parquet_file.getvalue())
 
 dag = DAG(
 dag_id="my_dag",
