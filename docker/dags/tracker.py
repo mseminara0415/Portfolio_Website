@@ -10,6 +10,7 @@ import re
 from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 
+
 def get_iss_location(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
 
@@ -44,7 +45,7 @@ def get_iss_location(norad_id: int = 25544, units: str = "miles", is_tle:bool = 
         
     return iss_data
 
-def request_to_dataframe(input_data:dict) -> pd.DataFrame:
+def request_to_dataframe(ti:dict) -> pd.DataFrame:
     '''_summary_
     Takes input data in the form of a dictionary and returns
     a Pandas dataframe object.
@@ -60,10 +61,11 @@ def request_to_dataframe(input_data:dict) -> pd.DataFrame:
     pd.DataFrame
         _description_
     '''
+    input_data = ti.xcom_pull(task_ids=['get_data_from_api'])
 
     return pd.DataFrame.from_dict(data=[input_data])
 
-def dataframe_to_s3(input_datafame:pd.DataFrame, satellite_data_type:str = "position"):
+def dataframe_to_s3(ti, satellite_data_type:str = "position"):
     '''_summary_
     Convert pandas dataframe object to Apache Parquet file format and upload data
     to AWS s3 bucket.
@@ -78,6 +80,8 @@ def dataframe_to_s3(input_datafame:pd.DataFrame, satellite_data_type:str = "posi
         - position (default)
         - tle
     '''
+
+    input_dataframe = ti.xcom_pull(task_ids=['put_data_into_dataframe'])
     
     s3 = boto3.client('s3')
     todays_date = datetime.today().strftime(r"%Y-%m-%d")
@@ -93,25 +97,35 @@ def dataframe_to_s3(input_datafame:pd.DataFrame, satellite_data_type:str = "posi
         
     # Buffer data frame
     out_buffer = BytesIO() 
-    input_datafame.to_parquet(out_buffer, index=False)
+    input_dataframe.to_parquet(out_buffer, index=False)
 
     # Get the s3 objects timestamp based on the requested datatype
     s3.put_object(Bucket=bucket_name, Key=f"{todays_date}/{datetime.datetime.now()}-{satellite_data_type}.parquet", Body=out_buffer.getvalue())
 
-def raw_iss_position_ingestion():
-    '''_summary_
-    This function builds a datapipeline to get data from the API
-    and insert it into an AWS s3 bucket.
-    '''
+dag = DAG(
+dag_id="my_dag",
+start_date=datetime(2022, 1, 1),
+catchup=False,
+schedule_interval='*/10 * * * * *'    
+)
 
-    # Get ISS position data from the API
-    iss_position_data = get_iss_location(is_tle=False)
+get_data_from_api = PythonOperator(
+    task_id="get_data_from_api",
+    python_callable=get_iss_location,
+    dag=dag
+)
 
-    # Put data into Pandas Dataframe object
-    iss_position_dataframe = request_to_dataframe(iss_position_data)
+api_data_to_dataframe = PythonOperator(
+    task_id="put_data_into_dataframe",
+    python_callable=request_to_dataframe,
+    dag=dag
+)
 
-    # Transform dataframe to parquet format and insert into s3 bucket
-    dataframe_to_s3(
-        iss_position_dataframe,
-        "position"
-    )
+raw_data_to_s3 = PythonOperator(
+    task_id="ingest_raw_data_to_s3",
+    python_callable=dataframe_to_s3,
+    op_kwargs={'satellite_data_type':'position'},
+    dag=dag
+)
+
+get_data_from_api >> api_data_to_dataframe >> raw_data_to_s3
