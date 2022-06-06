@@ -2,3 +2,4 @@ nasa_secrets.txt
 portfolio_webserver.pem
 docker/logs.*
 docker/.env
+docker/logs
