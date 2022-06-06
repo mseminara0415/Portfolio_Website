@@ -10,9 +10,10 @@ import re
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 
-def load_raw_iss_to_s3(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
+def load_raw_iss_data_to_s3(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
 
     Parameters
@@ -31,7 +32,9 @@ def load_raw_iss_to_s3(norad_id: int = 25544, units: str = "miles", is_tle:bool 
     '''
 
     # Set s3 client
-    s3 = boto3.client('s3')
+    s3 = boto3.client(
+        's3'
+    )
 
     # Get todays data, which will be used for partitioning folders within bucket
     todays_date = datetime.today().strftime(r"%Y-%m-%d")
@@ -66,97 +69,28 @@ def load_raw_iss_to_s3(norad_id: int = 25544, units: str = "miles", is_tle:bool 
             Body=json.dumps(iss_data)
         )
 
-def request_to_dataframe(ti:dict) -> pd.DataFrame:
-    '''_summary_
-    Takes input data in the form of a dictionary and returns
-    a Pandas dataframe object.
+dag = DAG(
+dag_id="my_dag",
+start_date=datetime(2022, 1, 1),
+catchup=False,
+schedule_interval='*/10 * * * * *'    
+)
 
-    Parameters
-    ----------
-    input_data : dict
-        _description_
-        input data in the form of a dictionary datatype.
-
-    Returns
-    -------
-    pd.DataFrame
-        _description_
-    '''
-    input_data = ti.xcom_pull(task_ids=['get_data_from_api'])
-
-    df = pd.DataFrame.from_dict(data=[input_data])
-
-    # Buffer data frame
-    out_buffer = BytesIO() 
-    df.to_parquet(out_buffer, index=False)
-
-
-
-    return pd.DataFrame.from_dict(data=[input_data])
-
-def dataframe_to_s3(ti, satellite_data_type:str = "position"):
-    '''_summary_
-    Convert pandas dataframe object to Apache Parquet file format and upload data
-    to AWS s3 bucket.
-
-    Parameters
-    ----------
-    input_datafame : pd.DataFrame
-        _description_
-    satellite_data_type : str, optional
-        _description_, by default "position"
-        Two options:
-        - position (default)
-        - tle
-    '''
-
-    input_parquet_file = ti.xcom_pull(task_ids=['put_data_into_dataframe'])
+load_raw_position_data = PythonOperator(
+    task_id="load_raw_iss_position_data_to_s3",
+    python_callable=load_raw_iss_data_to_s3,
+    dag=dag
     
-    s3 = boto3.client('s3')
-    todays_date = datetime.today().strftime(r"%Y-%m-%d")
-    bucket_name = f"satellite_tracker-{satellite_data_type}-raw"
+)
 
-    # Try and create a bucket in S3
-    try:        
-        s3.create_bucket(Bucket=f"satellite_tracker-{satellite_data_type}-raw", CreateBucketConfiguration={
-        'LocationConstraint': 'us-west-1'})
-    # If the bucket already exists, continue process
-    except (botocore.exceptions.ClientError):
-        print(f"This Bucket Already Exists! Uploading data to folder within existing bucket 'satellite_tracker-{satellite_data_type}-raw`.")    
-
-    # Get the s3 objects timestamp based on the requested datatype
-    s3.put_object(Bucket=bucket_name, Key=f"{todays_date}/{datetime.datetime.now()}-{satellite_data_type}.parquet", Body=input_parquet_file.getvalue())
-
-# dag = DAG(
-# dag_id="my_dag",
-# start_date=datetime(2022, 1, 1),
-# catchup=False,
-# schedule_interval='*/10 * * * * *'    
-# )
-
-# get_data_from_api = PythonOperator(
-#     task_id="get_data_from_api",
-#     python_callable=get_iss_location,
-#     dag=dag
-# )
-
-# api_data_to_dataframe = PythonOperator(
-#     task_id="put_data_into_dataframe",
-#     python_callable=request_to_dataframe,
-#     dag=dag
-# )
-
-# raw_data_to_s3 = PythonOperator(
-#     task_id="ingest_raw_data_to_s3",
-#     python_callable=dataframe_to_s3,
-#     op_kwargs={'satellite_data_type':'position'},
+# load_raw_tle_data = PythonOperator(
+#     task_id="load_raw_iss_tle_data_to_s3",
+#     python_callable=load_raw_iss_data_to_s3,
+#     op_kwargs={'is_tle': True},
 #     dag=dag
 # )
 
 # get_data_from_api >> api_data_to_dataframe >> raw_data_to_s3
-
-load_raw_iss_to_s3(is_tle=False)
-
 
 
 # Steps of datapipeline:
