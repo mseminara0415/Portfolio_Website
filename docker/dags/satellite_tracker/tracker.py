@@ -15,8 +15,7 @@ from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
-
-def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
+def download_satellite_data(ti, norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
 
     Parameters
@@ -50,64 +49,19 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
     
     timestamp_value = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
     
-    file_path = f"/usr/local/airflow/satellite_tracking/data/{satellite_data_type}_raw-{timestamp_value}.json"
-    file_path_2 = Path(r'/usr/local/airflow/satellite_tracking/data',satellite_data_type+'-'+timestamp_value+'.json')
+    file_path_2 = Path(r'/opt/airflow/satellite_data',satellite_data_type+'-'+timestamp_value+'.json')
+    xcomm_value = fr"/opt/airflow/satellite_data/{satellite_data_type}-{timestamp_value}.json"
 
     with open(file_path_2,'w') as f:
         json.dump(iss_data,f)
+    
+    ti.xcom_push(key="download_file_path_str",value=str(xcomm_value))
 
-def upload_to_s3(filename: str, key: str, bucket_name: str) -> None:
+def upload_to_s3(ti) -> None:
+    fetched_download_file = ti.xcom_pull(key="download_file_path_str",task_ids=['download_api_data'])
     hook = S3Hook('s3_conn_id')
     hook.load_file(
-        filename=filename,
-        key=key,
-        bucket_name=bucket_name
+        filename=fetched_download_file,
+        key='satellite-tracker-raw-data/position-data/',
+        bucket_name='satellite-tracker-raw-data'
     )
-
-# def pre_process():
-#     f = open("/usr/local/airflow/satellite_tracking/data/example.json", "w")
-#     f.write("key':'value'")
-#     f.close()
-
-dag = DAG(
-dag_id="my_dag",
-start_date=datetime(2022, 1, 1),
-catchup=False,
-schedule_interval='*/10 * * * * *'    
-)
-
-# check_file = BashOperator(
-#         task_id="check_file",
-#         bash_command="echo Hi > /usr/local/airflow/satellite_tracking/data/example.json ",
-#         dag=dag
-#     )
-
-pre_processing = PythonOperator(
-    task_id="pre_process",
-    python_callable=download_satellite_data,
-    dag=dag
-)
-
-pre_processing
-
-# load_raw_position_data = PythonOperator(
-#     task_id="download_satellite_data",
-#     python_callable=download_satellite_data,
-#     dag=dag    
-# )
-
-# load_raw_position_data = PythonOperator(
-#     task_id="load_raw_iss_position_data_to_s3",
-#     python_callable=load_raw_iss_data_to_s3,
-#     dag=dag
-    
-# )
-
-# load_raw_tle_data = PythonOperator(
-#     task_id="load_raw_iss_tle_data_to_s3",
-#     python_callable=load_raw_iss_data_to_s3,
-#     op_kwargs={'is_tle': True},
-#     dag=dag
-# )
-
-# get_data_from_api >> api_data_to_dataframe >> raw_data_to_s3
