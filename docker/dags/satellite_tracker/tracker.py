@@ -14,6 +14,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+from airflow.providers.amazon.aws.transfers import local_to_s3
 
 def download_satellite_data(ti, norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
@@ -36,32 +37,41 @@ def download_satellite_data(ti, norad_id: int = 25544, units: str = "miles", is_
     # If we want to return positioning data
     if not is_tle:
         # Get position data from API
-        api_url = f"https://api.wheretheiss.at/v1/satellites/{norad_id}?units={units}&?timestamp"
+        api_url = f'https://api.wheretheiss.at/v1/satellites/{norad_id}?units={units}&?timestamp'
         iss_data = requests.get(api_url).json()
-        satellite_data_type = "position"
+        satellite_data_type = 'position'
 
     # If we want to return orbital data
     elif is_tle:
         # Get tle data from API
-        api_url_tle = f"https://api.wheretheiss.at/v1/satellites/{norad_id}/tles"
+        api_url_tle = f'https://api.wheretheiss.at/v1/satellites/{norad_id}/tles'
         iss_data = requests.get(api_url).json()
-        satellite_data_type = "tle"
+        satellite_data_type = 'tle'
     
-    timestamp_value = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
+    timestamp_value = datetime.fromtimestamp(iss_data['timestamp'])
     
     file_path_2 = Path(r'/opt/airflow/satellite_data',satellite_data_type+'-'+timestamp_value+'.json')
-    xcomm_value = fr"/opt/airflow/satellite_data/{satellite_data_type}-{timestamp_value}.json"
+    
 
+    # Write json data to docker container  filepath
     with open(file_path_2,'w') as f:
         json.dump(iss_data,f)
     
-    ti.xcom_push(key="download_file_path_str",value=str(xcomm_value))
+    # Get docker filepath and filename
+    xcomm_full_filepath = os.path.abspath(file_path_2)
+    xcom_filename = os.path.basename(file_path_2)
+
+    # Push docker filepath and filename from dag task 
+    ti.xcom_push(key='download_file_path_str',value=str(xcomm_full_filepath))
+    ti.xcom_push(key='filename',value=str(xcom_filename))
 
 def upload_to_s3(ti) -> None:
-    fetched_download_file = ti.xcom_pull(key="download_file_path_str",task_ids=['download_api_data'])
+    fetched_download_file = ti.xcom_pull(key='download_file_path_str',task_ids=['download_api_data'])[0]
+    filename = ti.xcom_pull(key='filename',task_ids=['download_api_data'])[0]
     hook = S3Hook('s3_conn_id')
     hook.load_file(
         filename=fetched_download_file,
-        key='satellite-tracker-raw-data/position-data/',
-        bucket_name='satellite-tracker-raw-data'
+        key=f'position-data/{filename}',
+        bucket_name='satellite-tracker-raw-data',
+        replace=True
     )
