@@ -21,7 +21,7 @@ from airflow.models import TaskInstance
 from airflow.models import BaseOperator
 from typing import List, Set
 
-def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
+def download_satellite_data(ti, norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
 
     Parameters
