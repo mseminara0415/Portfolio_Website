@@ -32,5 +32,4 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         iss_data = requests.get(api_url).json()
         satellite_data_type = 'tle'
         
-    print(iss_data)
     return iss_data
