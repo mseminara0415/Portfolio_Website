@@ -3,7 +3,16 @@ import json
 import psycopg2
 from enum import Enum
 
-class rds_pg_database():
+class PostgreSQL_Database():
+    '''_summary_
+    Create a PostgreSQL database object to interact with a given database.
+    To use this class 
+
+    Returns
+    -------
+    _type_
+        _description_
+    '''
 
     class query_result_retrieval_method(Enum):
         FETCH_NONE = 0
@@ -34,6 +43,7 @@ class rds_pg_database():
         secret_name : str
             _description_
             Secrets name as identified in aws
+
         region_name : str
             _description_
             Region where your secrets are located (i.e. 'us-east-1')
@@ -73,16 +83,39 @@ class rds_pg_database():
         self,
         query: str,
         argslist:list = None,
-        result_retrieval:query_result_retrieval_method = query_result_retrieval_method.FETCH_NONE,
+        result_retrieval_method:query_result_retrieval_method = query_result_retrieval_method.FETCH_NONE,
         fetch_many_record_count:int = None,
         ):
+        '''_summary_
+        Execute a query against an already existing database.
+
+        Parameters
+        ----------
+        query : str
+            _description_
+            Query to run against the database. Must be compliant with PostgreSQL syntax.
+
+        argslist : list, optional
+            _description_, by default None
+            Only used if passing python variables to your SQL query.
+            Must be a tuple wrapped by a list (i.e tuple([item_1, item_2, ...])).
+
+        result_retrieval : query_result_retrieval_method, optional
+            _description_, by default query_result_retrieval_method.FETCH_NONE
+            Methods for returning SQL query execution results.
+
+        fetch_many_record_count : int, optional
+            _description_, by default None
+            N results to be returned if retrieval method 'FETCH_MANY' is selected.
+        '''
 
         with self.conn as conn:
             with conn.cursor() as cursor:
-                # If we are passing variables
+                
+                # If argslist is not empty
                 if argslist is not None:
-                    cursor.executemany(query,argslist)
-                # If we are not passing variables
+                    cursor.executemany(query, argslist)
+                # If argslist is empty
                 else:                    
                     cursor.execute(query)
 
@@ -108,27 +141,3 @@ class rds_pg_database():
         Closes database connection.
         '''
         self.conn.close()
-
-
-portfolio_website = rds_pg_database(secret_name='prod/portfolio-website/postgre',region='us-east-1')
-# portfolio_website.query(
-#     """
-#     CREATE TABLE IF NOT EXISTS testing (
-#         username varchar(45) NOT NULL,
-#         password varchar(45) NOT NULL,
-#         enabled integer NOT NULL DEFAULT '1',
-#         PRIMARY KEY (username)
-#     )
-#     """
-# )
-
-# portfolio_website.query(
-#     '''INSERT INTO testing (username, password, enabled) VALUES (%s, %s, %s);'''
-#     ,[("HELLOA???","WHOOOAOAOAOAA","65494")]
-# )
-
-portfolio_website.execute_query(
-    """
-    CREATE TABLE IF NOT EXISTS pw_iss_position
-    """
-)
