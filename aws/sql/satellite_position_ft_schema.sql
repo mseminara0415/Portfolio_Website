@@ -13,5 +13,5 @@ CREATE TABLE IF NOT EXISTS raw.satellite_position_ft (
     solar_lat numeric,
     solar_lon numeric,
     units varchar(255),
-    source_url text
+    source_url text NOT NULL
 )
