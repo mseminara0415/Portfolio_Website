@@ -66,10 +66,14 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
 
     s3.upload_fileobj(fileobj, bucket_name, key)
 
-satellite_data = download_satellite_data()
-
-# upload_to_s3(
-#     data=satellite_data,
-#     bucket_name='satellite-tracker',
-#     key=f'position/{satellite_data["name"]}-{satellite_data["id"]}-{satellite_data["timestamp"]}'
-# )
+# def lambda_handler(event, context):
+    
+#     # Get satellite data
+#     satellite_data = download_satellite_data()
+    
+#     # Upload to s3
+#     upload_to_s3(
+#         data=satellite_data,
+#         bucket_name='satellite-tracker',
+#         key=f'position/{satellite_data["name"]}-{satellite_data["id"]}-{satellite_data["timestamp"]}.json'
+#     )
