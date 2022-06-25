@@ -1,3 +1,4 @@
+from turtle import down
 import boto3
 from io import BytesIO
 import json
@@ -28,6 +29,7 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         api_url = f'https://api.wheretheiss.at/v1/satellites/{norad_id}?units={units}&?timestamp'
         iss_data = requests.get(api_url).json()
         iss_data['source'] = 'https://wheretheiss.at/'
+        iss_data['pooper'] = 'https://wheretheiss.at/'
 
     # If we want to return orbital data
     elif is_tle:
@@ -96,3 +98,15 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
     fileobj = BytesIO(data_as_json_object)
 
     s3.upload_fileobj(fileobj, bucket_name, key)
+
+def testing():
+    example_iss_data = download_satellite_data()
+
+    with open('iss_data_validation_schema.json') as file:
+        schema = json.load(file)
+
+    outcome = json_validation_checker(json_schema=schema,json_to_validate=example_iss_data)
+
+    print(outcome)
+
+testing()
