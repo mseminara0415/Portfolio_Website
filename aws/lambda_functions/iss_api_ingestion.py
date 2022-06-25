@@ -1,11 +1,8 @@
-from cmath import e
-from wsgiref.validate import validator
 import boto3
 from io import BytesIO
 import json
 import jsonschema
 import requests
-from yaml import load
 
 def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
