@@ -29,7 +29,6 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         api_url = f'https://api.wheretheiss.at/v1/satellites/{norad_id}?units={units}&?timestamp'
         iss_data = requests.get(api_url).json()
         iss_data['source'] = 'https://wheretheiss.at/'
-        iss_data['pooper'] = 'https://wheretheiss.at/'
 
     # If we want to return orbital data
     elif is_tle:
