@@ -38,12 +38,12 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         
     return iss_data
 
-def iss_data_validation(json_schema:dict, json_to_validate:dict) -> bool:
+def json_validation_checker(json_schema:dict, json_to_validate:dict) -> bool:
     '''_summary_
 
     Parameters
     ----------
-    schema : dict
+    json_schema : dict
         _description_
         Json schema used to validate against
 
