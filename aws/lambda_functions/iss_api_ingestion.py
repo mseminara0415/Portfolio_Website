@@ -38,7 +38,7 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         
     return iss_data
 
-def iss_data_validation(schema:dict, json_to_validate:dict) -> bool:
+def iss_data_validation(json_schema:dict, json_to_validate:dict) -> bool:
     '''_summary_
 
     Parameters
@@ -59,7 +59,7 @@ def iss_data_validation(schema:dict, json_to_validate:dict) -> bool:
     '''
 
     # Validate Schema
-    schema_validator = jsonschema.Draft202012Validator(schema)
+    schema_validator = jsonschema.Draft202012Validator(json_schema)
 
     # Using the above schema, check if our json is valid
     is_valid_json = schema_validator.is_valid(instance=json_to_validate)
@@ -80,7 +80,7 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
     bucket_name : str
         _description_
         Desired bucket location to put the fileobj
-        
+
     key : str
         _description_
         path/name of fileobject. Example (path/filename.json)
