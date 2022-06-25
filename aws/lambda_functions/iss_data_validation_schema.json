@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "maxProperties": 14,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "const": "iss"
+    },
+    "id": {
+      "type": "integer",
+      "const": 25544
+    },
+    "latitude": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "longitude": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180
+    },
+    "altitude": {
+      "type": "number"
+    },
+    "velocity": {
+      "type": "number"
+    },
+    "visibility": {
+      "type": "string"
+    },
+    "footprint": {
+      "type": "number"
+    },
+    "timestamp": {
+      "type": "integer"
+    },
+    "daynum": {
+      "type": "number"
+    },
+    "solar_lat": {
+      "type": "number"
+    },
+    "solar_lon": {
+      "type": "number"
+    },
+    "units": {
+      "type": "string",
+      "enum": ["miles", "kilometers"]
+    },
+    "source": {
+      "type": "string",
+      "const": "https://wheretheiss.at/"
+    }
+  },
+  "required": [
+    "name",
+    "id",
+    "latitude",
+    "longitude",
+    "altitude",
+    "velocity",
+    "visibility",
+    "footprint",
+    "timestamp",
+    "daynum",
+    "solar_lat",
+    "solar_lon",
+    "units",
+    "source"
+  ],
+  "additionalProperties": false
+}

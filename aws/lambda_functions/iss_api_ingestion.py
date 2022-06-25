@@ -1,6 +1,7 @@
 import boto3
 from io import BytesIO
 import json
+import jsonschema
 import requests
 
 def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
@@ -37,6 +38,34 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         
     return iss_data
 
+def json_validation_checker(json_schema:dict, json_to_validate:dict) -> bool:
+    '''_summary_
+
+    Parameters
+    ----------
+    json_schema : dict
+        _description_
+        Json schema used to validate against
+
+    json_to_validate : dict
+        _description_
+        Json used to validate against the schema
+
+    Returns
+    -------
+    bool
+        _description_
+        returns True if json is valid and False if not valid
+    '''
+
+    # Validate Schema
+    schema_validator = jsonschema.Draft202012Validator(json_schema)
+
+    # Using the above schema, check if our json is valid
+    is_valid_json = schema_validator.is_valid(instance=json_to_validate)
+
+    return is_valid_json
+
 def upload_to_s3(data:dict, bucket_name:str, key:str):
     '''_summary_
     Upload fileobject to desired s3 bucket.
@@ -47,9 +76,11 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
         _description_
         data to be uploaded. In our case this is
         most likely a json API response.
+
     bucket_name : str
         _description_
         Desired bucket location to put the fileobj
+
     key : str
         _description_
         path/name of fileobject. Example (path/filename.json)
