@@ -3,7 +3,7 @@ import json
 
 def get_s3_object_data(bucket_name:str, key:str) -> dict:
     '''_summary_
-    Get contents from s3 file.
+    Get contents from s3 json file.
 
     Parameters
     ----------
