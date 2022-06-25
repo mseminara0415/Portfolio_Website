@@ -46,6 +46,7 @@ def iss_data_validation(schema:dict, json_to_validate:dict) -> bool:
     schema : dict
         _description_
         Json schema used to validate against
+
     json_to_validate : dict
         _description_
         Json used to validate against the schema
@@ -75,9 +76,11 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
         _description_
         data to be uploaded. In our case this is
         most likely a json API response.
+
     bucket_name : str
         _description_
         Desired bucket location to put the fileobj
+        
     key : str
         _description_
         path/name of fileobject. Example (path/filename.json)
