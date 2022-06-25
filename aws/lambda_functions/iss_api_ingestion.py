@@ -1,7 +1,11 @@
+from cmath import e
+from wsgiref.validate import validator
 import boto3
 from io import BytesIO
 import json
+import jsonschema
 import requests
+from yaml import load
 
 def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:bool = False) -> dict:
     '''_summary_
@@ -27,6 +31,7 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         api_url = f'https://api.wheretheiss.at/v1/satellites/{norad_id}?units={units}&?timestamp'
         iss_data = requests.get(api_url).json()
         iss_data['source'] = 'https://wheretheiss.at/'
+        iss_data['checking'] = 'faslseeeee'
 
     # If we want to return orbital data
     elif is_tle:
@@ -36,6 +41,33 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         iss_data['source'] = 'https://wheretheiss.at/'
         
     return iss_data
+
+def iss_data_validation(schema:dict, json_to_validate:dict) -> bool:
+    '''_summary_
+
+    Parameters
+    ----------
+    schema : dict
+        _description_
+        Json schema used to validate against
+    json_to_validate : dict
+        _description_
+        Json used to validate against the schema
+
+    Returns
+    -------
+    bool
+        _description_
+        returns True if json is valid and False if not valid
+    '''
+
+    # Validate Schema
+    schema_validator = jsonschema.Draft202012Validator(schema)
+
+    # Using the above schema, check if our json is valid
+    is_valid_json = schema_validator.is_valid(instance=json_to_validate)
+
+    return is_valid_json
 
 def upload_to_s3(data:dict, bucket_name:str, key:str):
     '''_summary_
