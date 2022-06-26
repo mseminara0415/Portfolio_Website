@@ -1,6 +1,5 @@
 {
   "type": "object",
-  "maxProperties": 14,
   "properties": {
     "name": {
       "type": "string",
@@ -62,14 +61,9 @@
     "longitude",
     "altitude",
     "velocity",
-    "visibility",
-    "footprint",
     "timestamp",
-    "daynum",
-    "solar_lat",
-    "solar_lon",
     "units",
     "source"
   ],
-  "additionalProperties": false
+  "additionalProperties": true
 }

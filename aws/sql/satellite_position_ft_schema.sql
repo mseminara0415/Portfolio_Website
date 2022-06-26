@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS raw.satellite_position_ft (
     norad_id  int NOT NULL,
     latitude numeric NOT NULL,
     longitude numeric NOT NULL,
-    altitude numeric,
+    altitude numeric NOT NULL,
     velocity numeric NOT NULL,
     visibility varchar(255),
     footprint numeric,

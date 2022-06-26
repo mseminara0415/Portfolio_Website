@@ -1,4 +1,3 @@
-from turtle import down
 import boto3
 from io import BytesIO
 import json
@@ -29,7 +28,7 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         api_url = f'https://api.wheretheiss.at/v1/satellites/{norad_id}?units={units}&?timestamp'
         iss_data = requests.get(api_url).json()
         iss_data['source'] = 'https://wheretheiss.at/'
-
+    
     # If we want to return orbital data
     elif is_tle:
         # Get tle data from API
@@ -38,7 +37,7 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         iss_data['source'] = 'https://wheretheiss.at/'
         
     return iss_data
-
+    
 def json_validation_checker(json_schema:dict, json_to_validate:dict) -> bool:
     '''_summary_
 
@@ -77,11 +76,9 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
         _description_
         data to be uploaded. In our case this is
         most likely a json API response.
-
     bucket_name : str
         _description_
         Desired bucket location to put the fileobj
-
     key : str
         _description_
         path/name of fileobject. Example (path/filename.json)
@@ -98,14 +95,26 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
 
     s3.upload_fileobj(fileobj, bucket_name, key)
 
-def testing():
-    example_iss_data = download_satellite_data()
-
+def lambda_handler(event, context):
+    
+    # Get satellite data
+    satellite_data = download_satellite_data()
+    
+    # Get Json schema to validate against
     with open('iss_data_validation_schema.json') as file:
-        schema = json.load(file)
-
-    outcome = json_validation_checker(json_schema=schema,json_to_validate=example_iss_data)
-
-    print(outcome)
-
-testing()
+        iss_validation_schema = json.load(file)
+    
+    is_valid = json_validation_checker(json_schema=iss_validation_schema,json_to_validate=satellite_data)
+    
+    print(f"IS THIS VALID?: {is_valid}")
+    
+    if is_valid:
+    
+        # Upload to s3
+        upload_to_s3(
+            data=satellite_data,
+            bucket_name='satellite-tracker',
+            key=f'position/{satellite_data["name"]}-{satellite_data["id"]}-{satellite_data["timestamp"]}.json'
+        )
+    else:
+        pass
