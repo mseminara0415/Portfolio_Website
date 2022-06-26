@@ -34,6 +34,7 @@ def download_satellite_data(norad_id: int = 25544, units: str = "miles", is_tle:
         # Get tle data from API
         api_url_tle = f'https://api.wheretheiss.at/v1/satellites/{norad_id}/tles'
         iss_data = requests.get(api_url_tle).json()
+        iss_data['id'] = int(iss_data['id'])
         iss_data['source'] = 'https://wheretheiss.at/'
         
     return iss_data
@@ -93,6 +94,7 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
     # Write to IO buffer
     fileobj = BytesIO(data_as_json_object)
 
+    # Upload file to s3
     s3.upload_fileobj(fileobj, bucket_name, key)
 
 def lambda_handler(event, context):
@@ -104,12 +106,10 @@ def lambda_handler(event, context):
     with open('iss_data_validation_schema.json') as file:
         iss_validation_schema = json.load(file)
     
+    # Determine if json data is valid based on the provided schema
     is_valid = json_validation_checker(json_schema=iss_validation_schema,json_to_validate=satellite_data)
     
-    print(f"IS THIS VALID?: {is_valid}")
-    
-    if is_valid:
-    
+    if is_valid:    
         # Upload to s3
         upload_to_s3(
             data=satellite_data,
@@ -118,3 +118,4 @@ def lambda_handler(event, context):
         )
     else:
         pass
+    

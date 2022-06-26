@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "requested_timestamp": {
+      "type": "integer"
+    },
+    "tle_timestamp": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "string",
+      "const": 25544
+    },
+    "name": {
+      "type": "string"
+    },
+    "header": {
+      "type": "string"
+    },
+    "line1": {
+      "type": "string"
+    },
+    "line2": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "const": "https://wheretheiss.at/"
+    }
+  },
+  "required": [
+    "requested_timestamp",
+    "tle_timestamp",
+    "id",
+    "name",
+    "header",
+    "line1",
+    "line2",
+    "source"
+  ]
+}

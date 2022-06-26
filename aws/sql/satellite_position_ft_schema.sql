@@ -1,7 +1,7 @@
 -- Create satellite position fact table within the raw schema
 CREATE TABLE IF NOT EXISTS raw.satellite_position_ft (
     name varchar(255) NOT NULL,
-    norad_id  int NOT NULL,
+    id int NOT NULL,
     latitude numeric NOT NULL,
     longitude numeric NOT NULL,
     altitude numeric NOT NULL,
@@ -13,5 +13,5 @@ CREATE TABLE IF NOT EXISTS raw.satellite_position_ft (
     solar_lat numeric,
     solar_lon numeric,
     units varchar(255),
-    source_url text NOT NULL
+    source text NOT NULL
 )
