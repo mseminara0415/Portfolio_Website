@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "requested_timestamp": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "line1": {
+      "type": "string"
+    },
+    "line2": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "const": "https://www.n2yo.com/"
+    }
+  },
+  "required": [
+    "requested_timestamp",
+    "id",
+    "name",
+    "line1",
+    "line2",
+    "source"
+  ]
+}
