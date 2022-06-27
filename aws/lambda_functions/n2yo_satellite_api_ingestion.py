@@ -127,10 +127,30 @@ def change_dictionary_key_name(dictionary:dict, original_key:str, new_key: str) 
     '''
     dictionary[new_key] = dictionary.pop(original_key)
 
-def download_satellite_data(norad_id: int = 25544, is_tle:bool = False) -> dict:
+def download_satellite_data(n2yo_secrets:dict, norad_id: int = 25544, is_tle:bool = False ) -> dict:
+    '''_summary_
+
+    Parameters
+    ----------
+    n2yo_secrets : dict
+        _description_
+        Secrets needed to access n2yo API
+    norad_id : int, optional
+        _description_, by default 25544
+        Satellite norad id. By default this is set to the ISS (International Space Station)
+    is_tle : bool, optional
+        _description_, by default False
+        If false, we access satellite position data. If true, we access satellite orbital data.
+
+    Returns
+    -------
+    dict
+        _description_
+        Depending on value set for is_tle, returns a dictionary with either satellite position or satellite
+        orbital data.
+    '''
 
     # Get secrets for n2yo website
-    n2yo_secrets = get_rds_db_secrets(secret_name='prod/portfolio-website/n2yo_API', region_name='us-east-1')
     API_KEY = n2yo_secrets['API_KEY']
     LATITUDE = n2yo_secrets['LATITUDE']
     LONGITUDE = n2yo_secrets['LONGITUDE']
@@ -151,7 +171,7 @@ def download_satellite_data(norad_id: int = 25544, is_tle:bool = False) -> dict:
         change_dictionary_key_name(flattened_satellite_data, original_key='satlatitude', new_key='latitude')
         change_dictionary_key_name(flattened_satellite_data, original_key='satlongitude', new_key='longitude')
         change_dictionary_key_name(flattened_satellite_data, original_key='sataltitude', new_key='altitude')
-        change_dictionary_key_name(flattened_satellite_data, original_key='eclipsed', new_key='visbility')
+        change_dictionary_key_name(flattened_satellite_data, original_key='eclipsed', new_key='visibility')
 
         # Drop unwanted key/value(s)
         del flattened_satellite_data['transactionscount']
@@ -164,7 +184,7 @@ def download_satellite_data(norad_id: int = 25544, is_tle:bool = False) -> dict:
         flattened_satellite_data['altitude'] = flattened_satellite_data['altitude'] * 0.62137
 
         # Change 'vibility' value from boolean to string
-        if flattened_satellite_data['visibility'] is False:
+        if not flattened_satellite_data['visibility']:
             flattened_satellite_data['visibility'] = 'eclipsed'
         else:
             flattened_satellite_data['visibility'] = 'daylight'      
@@ -231,8 +251,12 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
     s3.upload_fileobj(fileobj, bucket_name, key)
 
 def lambda_handler(event, context):
+
+    # Get secrets for n2yo API
+    n2yo_secrets = get_rds_db_secrets(secret_name='prod/portfolio-website/n2yo_API', region_name='us-east-1')
+
     # Get satellite data
-    satellite_data = download_satellite_data(norad_id=36516, is_tle=True)
+    satellite_data = download_satellite_data(n2yo_secrets=n2yo_secrets, norad_id=36516, is_tle=True)
     
     # Get Json schema to validate against
     with open('data_validation_schema.json') as file:
