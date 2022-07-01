@@ -13,8 +13,6 @@ import wikipedia
 wiki_url = 'https://en.wikipedia.org/wiki/List_of_Earth_observation_satellites'
 base_url = 'https://en.wikipedia.org'
 
-
-
 def get_active_satellites(wiki_url:str) -> dict:
     '''_summary_
     Gets the name and wiki link for active government satellites
@@ -125,7 +123,7 @@ def get_satellite_infobox_data(satellites:dict) -> list:
 
     return satellite_details_list
 
-def clean_string(string_to_clean:str):
+def clean_string(string_to_clean:str) -> str:
 
     # Lower case string
     string_to_clean = string_to_clean.lower()
@@ -141,7 +139,26 @@ def clean_string(string_to_clean:str):
 
     return cleaned_string
     
-def find_item(dict_obj:dict, key):
+def find_item(dict_obj:dict, key) -> bool:
+    '''_summary_
+    Recursivly look through a dictionary object for the provided key
+
+    Parameters
+    ----------
+    dict_obj : dict
+        _description_
+        Dictionary you want to search through
+
+    key : _type_
+        _description_
+        Key to search dictionary for
+
+    Returns
+    -------
+    bool
+        _description_
+    '''
+
     if key in dict_obj:
         return dict_obj[key]
     for k, v in dict_obj.items():
@@ -326,14 +343,12 @@ def upload_to_s3(data:dict, bucket_name:str, key:str):
 
     # Upload file to s3
     s3.upload_fileobj(fileobj, bucket_name, key)
-
-wiki_unique_uuid = str(uuid.uuid4())
     
 def lambda_handler(event, context):
+
+    wiki_unique_uuid = str(uuid.uuid4())
     
     wikipedia_satellite_detail = get_satellite_details()
-    
-    wikipedia_satellite_detail_filtered = wikipedia_satellite_detail
     
     upload_to_s3(
             data=wikipedia_satellite_detail,
