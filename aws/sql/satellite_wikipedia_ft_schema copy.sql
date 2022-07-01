@@ -1,0 +1,22 @@
+-- Create satellite position fact table within the raw schema
+CREATE TABLE IF NOT EXISTS raw.satellite_detail_dm (
+    name varchar(255) NOT NULL,
+    description text,
+    applications varchar,
+    operator varchar,
+    cospar_id varchar,
+    call_sign varchar,
+    manufacturer varchar,
+    mission_duration varchar,
+    mission_type varchar,
+    spacecraft_type varchar,
+    satellite_id int NOT NULL,
+    satellite_bus varchar,
+    launch_mass_lbs int,
+    launch_date date,
+    launch_site varchar,
+    reference_system varchar,
+    rocket varchar,
+    website varchar,
+    wikipedia_link varchar,
+)
