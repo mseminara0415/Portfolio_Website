@@ -1,8 +1,8 @@
--- Create satellite position fact table within the raw schema
+-- Create satellite wikipedia dimension table within the raw schema
 CREATE TABLE IF NOT EXISTS raw.satellite_detail_dm (
     name varchar(255) NOT NULL,
     description text,
-    applications varchar,
+    application varchar,
     operator varchar,
     cospar_id varchar,
     call_sign varchar,
