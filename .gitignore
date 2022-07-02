@@ -4,3 +4,4 @@ docker/logs.*
 docker/.env
 docker/logs
 aws/secrets.*
+aws/lambda_functions/testing/example_testing.py

@@ -120,21 +120,21 @@ class PostgreSQL_Database():
                     cursor.execute(query)
 
                 # Result retrieval methods
-                if self.query_result_retrieval_method.FETCH_NONE:
+                if result_retrieval_method == self.query_result_retrieval_method.FETCH_NONE:
                     pass
 
-                elif self.query_result_retrieval_method.FETCH_ONE:
-                    cursor.fetchone()
+                elif result_retrieval_method == self.query_result_retrieval_method.FETCH_ONE:
+                    return cursor.fetchone()
 
-                elif self.query_result_retrieval_method.FETCH_MANY:
+                elif result_retrieval_method == self.query_result_retrieval_method.FETCH_MANY:
                     # For the fetchmany method, the default result size is 1, unless otherwise specificed
                     if fetch_many_record_count is None:
-                        cursor.fetchmany(size=cursor.arraysize)
+                        return cursor.fetchmany(size=cursor.arraysize)
                     else:
-                        cursor.fetchmany(size=fetch_many_record_count)
+                        return cursor.fetchmany(size=fetch_many_record_count)
 
-                elif self.query_result_retrieval_method.FETCH_ALL:
-                    cursor.fetchall()
+                elif result_retrieval_method == self.query_result_retrieval_method.FETCH_ALL:
+                    return cursor.fetchall()
 
     def close(self):
         '''_summary_
