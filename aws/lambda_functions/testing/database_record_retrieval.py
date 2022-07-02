@@ -19,7 +19,3 @@ test = pg_db.execute_query(
 
 example_list = [item for sublist in test for item in sublist]
 print(example_list)
-
-
-
-
