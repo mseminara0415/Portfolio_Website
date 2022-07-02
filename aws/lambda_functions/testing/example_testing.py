@@ -132,15 +132,3 @@ satellite = {
 
 db_columns = [column for column in wiki_to_db_column_map.values()]
 db_values = [find_item(satellite, k) for k in wiki_to_db_column_map.keys()]
-
-# test = get_all_keys(example_dict)
-# print(test)
-# print(db_columns)
-# print(db_values)
-test = find_item(satellite, 'mission_type')
-test_2 = find_item(satellite,'stanky_leg')
-print(test_2)
-# if test:
-#     print("it works!")
-# else:
-#     print("nope!")
