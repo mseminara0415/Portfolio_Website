@@ -121,7 +121,7 @@ satellite = {
         "rocket": "H-IIA 202",
         "launch_site": "Tanegashima, Yoshinobu 1",
         "contractor": "Mitsubishi Heavy Industries",
-        "reference_system": {'stanky_leg':'poopy'},
+        "reference_system": 'f0233',
         "regime": "Sun-synchronous orbit",
         "perigee_altitude": "636 km (395 mi)",
         "apogee_altitude": "639 km (397 mi)",
