@@ -1,0 +1,33 @@
+
+version: 2
+
+models:
+
+# Set schema for satellite tle data
+  - name: stg_satellite_tle_ft
+    description: "Model used to stage satellite tle data from our raw schema"
+    columns:
+      - name: id
+        description: "Satellite NORAD/SATCAT catalog id. This is a unique id given to each satellite."
+        tests:
+          - not_null
+      - name: name
+        description: "Satellite name"
+        tests:
+          - not_null
+      - name: header
+        description: "Satellite name when coming from https://wheretheiss.at/"
+      - name: timestamp
+        description: "Timestamp that tle was recorded at, formatted as a unix timestamp"
+        tests:
+          - not_null
+      - name: source
+        description: "Source of the tle data"
+      - name: line_1
+        description: "Line 1 of the tle orbital data"
+        tests:
+          - not_null
+      - name: line_2
+        description: "Line 2 of the tle orbital data"
+        tests:
+          - not_null
