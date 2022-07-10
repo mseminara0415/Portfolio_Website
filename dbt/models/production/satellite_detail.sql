@@ -17,7 +17,7 @@ WITH satellite_details AS (
         satellite_bus,
         launch_mass_lbs,
         launch_date,
-        AGE(launch_date) AS days_since_launch,
+        AGE(launch_date) AS time_since_launch,
         launch_site,
         reference_system,
         rocket,
