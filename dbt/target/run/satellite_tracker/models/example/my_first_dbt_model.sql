@@ -1,6 +1,6 @@
 
 
-  create  table "portfolio_website"."analytics"."my_first_dbt_model__dbt_tmp"
+  create  table "portfolio_website"."staging"."my_first_dbt_model__dbt_tmp"
   as (
     /*
     Welcome to your first dbt model!

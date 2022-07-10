@@ -1,0 +1,52 @@
+
+version: 2
+
+models:
+
+# Set schema for satellite position data
+  - name: stg_satellite_position_ft
+    description: "Model used to stage satellite position data from our raw schema"
+    columns:
+      - name: name
+        description: "Satellite name"
+        tests:
+          - not_null
+      - name: id
+        description: "Satellite NORAD/SATCAT catalog id. This is a unique id given to each satellite."
+        tests:
+          - not_null
+      - name: latitude
+        description: "Latitude"
+        tests:
+          - not_null
+      - name: longitude
+        description: "Longitude"
+        tests:
+          - not_null
+      - name: altitude
+        description: "Altitude of satellite. Look at units column to determine if this is measured in miles or kilometers"
+        tests:
+          - not_null
+      - name: velocity_mph
+        description: "Velocity as measured in miles per hour"
+      - name: visibility
+        description: "Visibility of the satellite. The satellite can either be 'visible' or 'eclipsed'"
+        tests:
+          - accepted_values:
+              values: ['visible', 'eclipsed']
+      - name: footprint
+        description: "Ground area of satellite where its transponders offer coverage"
+      - name: timestamp
+        description: "Timestamp that satellite position was recorded at, formatted as a unix timestmap"
+        tests:
+          - not_null
+      - name: daynum
+        description: "Number of days that the satellite has been in orbit"
+      - name: solar_lat
+        description: "latitude position of the sun on the satellite"
+      - name: solar_lon
+        description: "longitude position of the sun on the satellite"
+      - name: units
+        description: "Units in which the satellite's altitude is measured. Will either be 'miles' or 'kilometers'"
+      - name: source
+        description: "Source of the position data"

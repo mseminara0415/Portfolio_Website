@@ -1,0 +1,47 @@
+
+version: 2
+
+models:
+
+# Set schema for satellite detail data
+  - name: stg_satellite_detail_dm
+    description: "Model used to stage satellite detail data from our raw schema"
+    columns:
+      - name: satellite_id
+        description: "Satellite NORAD/SATCAT catalog id. This is a unique id given to each satellite"
+        tests:
+          - not_null
+      - name: name
+        description: "Satellite name"
+        tests:
+          - not_null
+      - name: description
+        description: "First paragraph from Wikipedia describing the satellite"
+      - name: operator
+        description: "Company who operates the satellite"
+      - name: cospar_id
+        description: "International satellite designation. similar but not synonymous with NORAD/SATCAT catelog id"
+      - name: manufacturer
+        description: "Company that manufactured the satellite"
+      - name: mission_duration
+        description: "How long the mission was planned for / how much time has elapsed since the mission started"
+      - name: mission_type
+        description: "Type of mission being conducted (i.e. earth observation)"
+      - name: spacecraft_type
+        description: "Purpose of the spacecraft (i.e. landsat, TIRO) "
+      - name: satellite_bus
+        description: "Main body and structural component of the satellite in which the payload / scientific instruments are held"
+      - name: launch_mass_lbs
+        description: "Launch mass of satellite denoted in pounds (lb)"
+      - name: launch_date
+        description: "Launch date of the satellite"
+      - name: launch_site
+        description: "Location where the satellite was launched from"
+      - name: reference_system
+        description: "Describes the type of orbit (i.e. geocentric, heliocentric)"
+      - name: rocket
+        description: "Type of rocket used to launch the satellite"
+      - name: satellite_website
+        description: "Website to find out more information about the satellite"
+      - name: wikipedia_link
+        description: "Link to wikipedia page used to scrape this information"
