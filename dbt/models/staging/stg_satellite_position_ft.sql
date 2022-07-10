@@ -34,7 +34,8 @@ WITH staged_satellite_position_ft AS (
         solar_lat,
         solar_lon,
         units,
-        source
+        source,
+        NOT altitude = 0 AS still_in_orbit
     FROM raw.satellite_position_ft
 )
 

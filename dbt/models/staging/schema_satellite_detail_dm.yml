@@ -5,7 +5,7 @@ models:
 
 # Set schema for satellite detail data
   - name: stg_satellite_detail_dm
-    description: "Model used to stage satellite data data from our raw schema"
+    description: "Model used to stage satellite detail data from our raw schema"
     columns:
       - name: satellite_id
         description: "Satellite NORAD/SATCAT catalog id. This is a unique id given to each satellite"
