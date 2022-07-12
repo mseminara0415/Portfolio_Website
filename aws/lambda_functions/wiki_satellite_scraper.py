@@ -1,3 +1,4 @@
+from turtle import title
 from bs4 import BeautifulSoup
 from dateutil import parser
 from datetime import datetime
@@ -49,7 +50,11 @@ def get_active_satellites(wiki_url:str) -> dict:
 
     # Zip together 
     active_satellite_dictionary = dict(zip(active_satellite_names,  active_satellite_links))
-    
+
+    # Add any additional satellites
+    active_satellite_dictionary['James Webb Space Telescope'] = 'https://en.wikipedia.org/wiki/James_Webb_Space_Telescope'
+
+    # uncomment below for testing purposes
     # active_satellite_dictionary_filtered = dict(itertools.islice(active_satellite_dictionary.items(), 20)) 
 
     return active_satellite_dictionary
@@ -91,9 +96,12 @@ def get_satellite_infobox_data(satellites:dict) -> list:
 
         # Try and get a description for the satellite, if none is avaiable then set to empty string 
         try:
-            satellite_description = wikipedia.summary(satellite_name).replace("\n","")
+            satellite_description = wikipedia.summary(sentences=4, title=satellite_name).replace("\n","")
         except (wikipedia.DisambiguationError, wikipedia.PageError):
-            satellite_description = ''
+            try:
+                satellite_description = wikipedia.summary(auto_suggest=False, sentences=4, title=satellite_name).replace("\n","")
+            except wikipedia.PageError:
+                satellite_description = ''
 
         # Set satellite description and wikipedia link fields
         complete_satellite_data['description'] = satellite_description
