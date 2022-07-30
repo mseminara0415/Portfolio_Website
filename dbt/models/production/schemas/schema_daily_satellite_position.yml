@@ -1,0 +1,21 @@
+
+version: 2
+
+models:
+
+# Set schema for daily satellite position data
+  - name: daily_satellite_position
+    description: "Model used to show daily satellite position data"
+    columns:
+      - name: satellite_id
+        description: "Satellite NORAD/SATCAT catalog id. This is a unique id given to each satellite"
+        tests:
+          - not_null
+      - name: day
+        description: "Date that satellite data was captured"
+        tests:
+          - not_null
+      - name: average_velocity_mph
+        description: "Average daily satellite velocity measured in miles per hour"
+      - name: average_altitude_miles
+        description: "Average daily satellite altitude measured in miles"
