@@ -3,6 +3,7 @@
     materialized='view'
 ) }}
 
+-- Get all possible satellites we might want to track
 WITH satellites_to_track AS (
     SELECT
         DISTINCT id
@@ -55,8 +56,8 @@ final AS (
         newest_satellite_position.longitude,
         newest_satellite_position.altitude,
         newest_satellite_tle.tle_timestamp,
-        newest_satellite_tle.line_1,
-        newest_satellite_tle.line_2
+        newest_satellite_tle.line_1 AS tle_line_1,
+        newest_satellite_tle.line_2 AS tle_line_2
     FROM satellites_to_track
     LEFT JOIN newest_satellite_position
         ON satellites_to_track.id = newest_satellite_position.id

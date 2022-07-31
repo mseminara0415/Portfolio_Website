@@ -3,7 +3,7 @@ version: 2
 
 models:
 
-# Set schema for daily satellite position data
+# Set schema for daily satellite stats data
   - name: daily_satellite_position
     description: "Model used to show daily satellite position data"
     columns:

@@ -7,15 +7,21 @@ models:
   - name: daily_satellite_position
     description: "Model used to show daily satellite position data"
     columns:
-      - name: satellite_id
+      - name: id
         description: "Satellite NORAD/SATCAT catalog id. This is a unique id given to each satellite"
         tests:
           - not_null
-      - name: day
-        description: "Date that satellite data was captured"
+      - name: position_timestamp
+        description: "Most recent position timestamp for the satellite"
         tests:
           - not_null
-      - name: average_velocity_mph
-        description: "Average daily satellite velocity measured in miles per hour"
-      - name: average_altitude_miles
-        description: "Average daily satellite altitude measured in miles"
+      - name: latitude
+        description: "Satellite latitude"
+      - name: longitude
+        description: "Satellite longitude"
+      - name: altitude
+        description: "Satellite altitude"
+      - name: tle_timestamp
+        description: "Most recent tle timestamp for the satellite"
+      - name: tle_line_1
+        description: "Most recent tle timestamp for the satellite"
