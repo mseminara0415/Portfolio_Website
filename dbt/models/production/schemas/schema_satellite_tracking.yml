@@ -24,4 +24,6 @@ models:
       - name: tle_timestamp
         description: "Most recent tle timestamp for the satellite"
       - name: tle_line_1
-        description: "Most recent tle timestamp for the satellite"
+        description: "Most recent tle line 1 for the satellite"
+      - name: tle_line_2
+        description: "Most recent tle line 2 for the satellite"
