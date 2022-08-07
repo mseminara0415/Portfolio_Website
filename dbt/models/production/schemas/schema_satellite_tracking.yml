@@ -1,0 +1,29 @@
+
+version: 2
+
+models:
+
+# Set schema for satellite tracking data
+  - name: daily_satellite_position
+    description: "Model used to show daily satellite position data"
+    columns:
+      - name: id
+        description: "Satellite NORAD/SATCAT catalog id. This is a unique id given to each satellite"
+        tests:
+          - not_null
+      - name: position_timestamp
+        description: "Most recent position timestamp for the satellite"
+        tests:
+          - not_null
+      - name: latitude
+        description: "Satellite latitude"
+      - name: longitude
+        description: "Satellite longitude"
+      - name: altitude
+        description: "Satellite altitude"
+      - name: tle_timestamp
+        description: "Most recent tle timestamp for the satellite"
+      - name: tle_line_1
+        description: "Most recent tle line 1 for the satellite"
+      - name: tle_line_2
+        description: "Most recent tle line 2 for the satellite"

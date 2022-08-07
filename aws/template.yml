@@ -1,0 +1,17 @@
+Transform: AWS::Serverless-2016-10-31
+
+# Parameters:
+#   IssPositionToS3Hash:
+#     Type: String
+
+Resources:
+  iss_position_to_s3:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Gets iss position data from API and inserts into appropriate s3 bucket/key.
+      CodeUri: aws/lambda_functions/iss_position_to_s3
+      Role: 'arn:aws:iam::835668308120:role/iss_position_to_s3_role'
+      Runtime: python3.8
+      Handler: iss_position_to_s3.lambda_handler
+      # AutoPublishCodeSha256: !Ref Function1Hash
+      Timeout: 3
