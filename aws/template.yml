@@ -5,7 +5,7 @@ Transform: AWS::Serverless-2016-10-31
 #     Type: String
 
 Resources:
-  iss_position_to_s3:
+  IssPositionToS3:
     Type: AWS::Serverless::Function
     Properties:
       Description: Gets iss position data from API and inserts into appropriate s3 bucket/key.
